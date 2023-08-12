@@ -7,8 +7,11 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.Reportable.LOG_LEVEL;
 
 public class Drivebase extends SubsystemBase {
     private TalonFX leftMaster;
@@ -19,6 +22,7 @@ public class Drivebase extends SubsystemBase {
     private TalonFX rightFollower2;
 
     private DoubleSolenoid driveShifter;
+    private DoubleSolenoid driveShifter2;
 
     public Drivebase() {
         this.leftMaster = new TalonFX(DriveConstants.leftMasterID);
@@ -41,6 +45,7 @@ public class Drivebase extends SubsystemBase {
         this.rightFollower2.setInverted(InvertType.FollowMaster);
 
         this.driveShifter = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, DriveConstants.kSolenoidForwardID, DriveConstants.kSolenoidReverseID);
+        this.driveShifter2 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, DriveConstants.kSolenoidForwardID2, DriveConstants.kSolenoidReverseID2);
     }
 
     public void drive(double leftVelocity, double rightVelocity) {
@@ -50,15 +55,39 @@ public class Drivebase extends SubsystemBase {
 
     public void toggleShift() {
         this.driveShifter.toggle();
+        this.driveShifter2.toggle();
     }
 
     public void setShift(boolean shift) {
         if (shift) {
             this.driveShifter.set(Value.kForward);
+            this.driveShifter2.set(Value.kReverse);
         } else {
             this.driveShifter.set(Value.kReverse);
+            this.driveShifter2.set(Value.kForward);
         }
     }
 
+    public void initShuffleboard(LOG_LEVEL level) {
+        if (level == LOG_LEVEL.OFF || level == LOG_LEVEL.MINIMAL)  {
+            return;
+        }
+        ShuffleboardTab tab = Shuffleboard.getTab("Drivebase");
+
+        switch (level) {
+            case OFF:
+                break;
+            case ALL:
+            case MEDIUM:
+                tab.addNumber("Left Master Current", leftMaster::getStatorCurrent);
+                tab.addNumber("Left Follower Current", leftFollower::getStatorCurrent);
+                tab.addNumber("Left Follower 2 Current", leftFollower2::getStatorCurrent);
+                tab.addNumber("Right Master Current", rightMaster::getStatorCurrent);
+                tab.addNumber("Right Follower Current", rightFollower::getStatorCurrent);
+                tab.addNumber("Right Follower 2 Current", rightFollower2::getStatorCurrent);
+                
+            case MINIMAL:
+        }
+    }
 
 }

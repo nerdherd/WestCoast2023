@@ -15,10 +15,12 @@ public class AirCompressor extends SubsystemBase implements Reportable {
     private Compressor compressor;
 
     // Pressure sensor is connected to analog port on RoboRIO
-    private AnalogInput pressureSensor = new AnalogInput(PneumaticsConstants.kPressureSensorPort);
+    private AnalogInput pressureSensor;
 
     public AirCompressor() {
         compressor = new Compressor(PneumaticsConstants.kPCMPort, PneumaticsModuleType.CTREPCM);
+        // compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+        pressureSensor = new AnalogInput(PneumaticsConstants.kPressureSensorPort);
         enable();
         // compressor.disable();
     }
@@ -65,7 +67,8 @@ public class AirCompressor extends SubsystemBase implements Reportable {
                 break;
             case ALL:
             case MEDIUM:
-                tab.addNumber("Air Pressure", pressureSensor::getValue);
+                tab.addNumber("Air Pressure", pressureSensor::getVoltage);
+                // tab.addNumber("Compressor Current", compressor::getCurrent);
                 tab.addBoolean("Compressor Enabled", () -> enabled);
                 tab.add("Toggle Compressor", Commands.runOnce(this::toggleEnabled));
                 tab.add("Enable Compressor", Commands.runOnce(this::enable));
@@ -81,7 +84,7 @@ public class AirCompressor extends SubsystemBase implements Reportable {
                 break;
             case ALL:
             case MEDIUM:
-                SmartDashboard.putNumber("Air Pressure", pressureSensor.getValue());
+                SmartDashboard.putNumber("Air Pressure", pressureSensor.getVoltage());
                 SmartDashboard.putBoolean("Compressor Enabled", enabled);
             case MINIMAL:
                 break;

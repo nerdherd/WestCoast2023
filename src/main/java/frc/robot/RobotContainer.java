@@ -11,6 +11,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.Drive;
 import frc.robot.subsystems.AirCompressor;
 import frc.robot.subsystems.Drivebase;
+import frc.robot.subsystems.Reportable.LOG_LEVEL;
 
 public class RobotContainer {
   public Drivebase drivebase = new Drivebase();
@@ -21,12 +22,20 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+    initShuffleboard();
   }
 
   private void configureBindings() {
     drivebase.setDefaultCommand(new Drive(drivebase, () -> -driver.getHID().getLeftY(), () -> driver.getHID().getRightY()));
 
     driver.triangle().onTrue(Commands.runOnce(drivebase::toggleShift));
+    driver.square().onTrue(Commands.runOnce(() -> drivebase.setShift(true)));
+    driver.circle().onTrue(Commands.runOnce(() -> drivebase.setShift(false)));
+  }
+
+  public void initShuffleboard() {
+    airCompressor.initShuffleboard(LOG_LEVEL.MEDIUM);
+    drivebase.initShuffleboard(LOG_LEVEL.MEDIUM);
   }
 
   public Command getAutonomousCommand() {
